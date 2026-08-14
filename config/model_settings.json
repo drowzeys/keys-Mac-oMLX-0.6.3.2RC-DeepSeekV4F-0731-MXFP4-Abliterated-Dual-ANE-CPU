@@ -1,0 +1,7 @@
+{
+  "version": "1.0",
+  "models": {
+    "dsv4f-mxfp4": { "mtp_enabled": true },
+    "dsv4f-2p4bit": { "mtp_enabled": true }
+  }
+}
