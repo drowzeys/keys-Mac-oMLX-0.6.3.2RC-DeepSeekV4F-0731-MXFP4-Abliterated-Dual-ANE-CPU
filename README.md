@@ -55,6 +55,42 @@ Read throughput from oMLX's own server log (`~/.omlx/logs/server.log`, `Completi
 - **The brew build fails; build from source with Python 3.11** (3.14 is rejected by oMLX's version pin; the brew formula's env picks the wrong one).
 - **Memory:** the 163 GB checkpoint + MTP overhead needs the Mac's full RAM. Anything else large resident (e.g. pinned Ollama models) will OOM-kill the load.
 
+## Abliterated (same 49 tok/s recipe, refusals removed)
+
+Same Vontra MXFP4-MLX checkpoint, same oMLX + DSpark path. Only `attn.wo_b` on **L10–42** is projected (λ=3.5, k=1). **MTP and L0–9 stay stock.** This is the Mac packing of the published 0731 32/32 Mida recipe ([DGX pack](https://huggingface.co/drowzeys/keys-DeepSeekV4-Flash-GA-0731-Dspark-Abliterated-32-32)).
+
+| | |
+|--|--|
+| Method | dequant MXFP8 `wo_b` → rank-1 project → keep original e8m0 scales, re-encode e4m3 |
+| Edits | **33** tensors · mean Δrel **0.0557** |
+| Refusal suite | **32/32 BYPASS** · 0 refuse · 0 garble · 0 empty |
+| Coherence | hello / Paris / `17*19=323` / `print("hello")` clean |
+| DSpark | still on (count accept **100%**, tok/cycle **3.73** on a 220-tok count) |
+
+```bash
+# after the stock recipe above is on disk:
+python3 scripts/project_wob_mlx.py \
+  --src ~/.omlx/models/dsv4f-mxfp4 \
+  --dst ~/models/dsv4f-mxfp4-ablit-mida \
+  --direction ablit/refusal_direction_reablit_20260726.npz \
+  --lambda-attn 3.5 --min-layer 10 --max-layer 42 --n-directions 1
+
+# keep stock, serve ablit under the same recipe name
+ln -sfn "$(readlink -f ~/.omlx/models/dsv4f-mxfp4)" ~/.omlx/models/dsv4f-mxfp4-stock
+ln -sfn ~/models/dsv4f-mxfp4-ablit-mida ~/.omlx/models/dsv4f-mxfp4
+ln -sfn ~/models/dsv4f-mxfp4-ablit-mida ~/.omlx/models/dsv4f-mxfp4-ablit
+cp config/model_settings.json ~/.omlx/model_settings.json   # mtp_enabled + enable_thinking=false
+omlx restart
+```
+
+Requests need `chat_template_kwargs.enable_thinking = false` (or the model_settings toggle above). Otherwise 0731 spends the token budget inside a hidden plan and short answers look truncated.
+
+Flip back to stock: `ln -sfn ~/.omlx/models/dsv4f-mxfp4-stock ~/.omlx/models/dsv4f-mxfp4 && omlx restart`.
+
+The projector **never writes through the Hugging Face blob store** — unchanged shards are hardlinked, edited shards are APFS-cloned then patched. See [ABLIT.md](ABLIT.md).
+
+These weights have safety refusals removed. Same responsible-use terms as the other Keys 0731 abliterated releases: research / red-team only; you supply the guardrails.
+
 ## Open item
 Cold long-context TTFT is still ~13 s for a 5.8K-token prompt (the prefill of a 163 GB model). Offloading prefill to a companion DGX Spark (its native CUDA DSA kernels) would cut that — true prefill/decode disaggregation — but oMLX has no KV-injection API, so that path needs a custom decode server. Not done here.
 
@@ -63,4 +99,4 @@ Cold long-context TTFT is still ~13 s for a 5.8K-token prompt (the prefill of a 
 - 4-bit MXFP4 MLX quant (keeps MTP): [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX)
 - Runtime + DSpark MTP + DSA kernels: [`jundot/omlx`](https://github.com/jundot/omlx)
 
-This repo contributes the **serving recipe + benchmark methodology + the counter-intuitive 4-bit-beats-2.4-bit finding**, not the model weights.
+This repo contributes the **serving recipe + benchmark methodology + the counter-intuitive 4-bit-beats-2.4-bit finding + the MXFP8 `wo_b` abliteration projector**, not the 163 GB weight files.

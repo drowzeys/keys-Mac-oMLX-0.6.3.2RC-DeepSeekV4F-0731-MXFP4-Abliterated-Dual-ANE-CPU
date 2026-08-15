@@ -1,0 +1,281 @@
+{
+  "method": "layer-range-wo_b-projection-mxfp8-mlx-keep-scales",
+  "scale_policy": "keep original e8m0 group-32 scales; re-encode e4m3 only",
+  "lambda_attn": 3.5,
+  "min_layer": 10,
+  "max_layer": 42,
+  "edit_mtp": false,
+  "n_directions": 1,
+  "direction": "/Users/cityhunter/dsv4-mac-ablit/refusal_direction_reablit_20260726.npz",
+  "n_edited": 33,
+  "stats": [
+    {
+      "tensor": "layers.10.attn.wo_b.weight",
+      "rel_fro": 0.04731817916035652,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.12.attn.wo_b.weight",
+      "rel_fro": 0.06602808088064194,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.11.attn.wo_b.weight",
+      "rel_fro": 0.053517840802669525,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.13.attn.wo_b.weight",
+      "rel_fro": 0.058160025626420975,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.15.attn.wo_b.weight",
+      "rel_fro": 0.06192335486412048,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.14.attn.wo_b.weight",
+      "rel_fro": 0.06835004687309265,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.16.attn.wo_b.weight",
+      "rel_fro": 0.063268281519413,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.17.attn.wo_b.weight",
+      "rel_fro": 0.062187179923057556,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.19.attn.wo_b.weight",
+      "rel_fro": 0.053909625858068466,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.18.attn.wo_b.weight",
+      "rel_fro": 0.054262131452560425,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.20.attn.wo_b.weight",
+      "rel_fro": 0.07432033866643906,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.21.attn.wo_b.weight",
+      "rel_fro": 0.05264768376946449,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.22.attn.wo_b.weight",
+      "rel_fro": 0.050051044672727585,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.23.attn.wo_b.weight",
+      "rel_fro": 0.055331919342279434,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.24.attn.wo_b.weight",
+      "rel_fro": 0.056112442165613174,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.25.attn.wo_b.weight",
+      "rel_fro": 0.04639293998479843,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.26.attn.wo_b.weight",
+      "rel_fro": 0.07052814960479736,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.27.attn.wo_b.weight",
+      "rel_fro": 0.05064227432012558,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.28.attn.wo_b.weight",
+      "rel_fro": 0.05676072835922241,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.29.attn.wo_b.weight",
+      "rel_fro": 0.05300034210085869,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.30.attn.wo_b.weight",
+      "rel_fro": 0.04847445711493492,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.31.attn.wo_b.weight",
+      "rel_fro": 0.04951475188136101,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.33.attn.wo_b.weight",
+      "rel_fro": 0.04734744504094124,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.32.attn.wo_b.weight",
+      "rel_fro": 0.05774226412177086,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.34.attn.wo_b.weight",
+      "rel_fro": 0.06158747524023056,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.35.attn.wo_b.weight",
+      "rel_fro": 0.06589401513338089,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.37.attn.wo_b.weight",
+      "rel_fro": 0.04830814152956009,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.36.attn.wo_b.weight",
+      "rel_fro": 0.047793980687856674,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.38.attn.wo_b.weight",
+      "rel_fro": 0.05038854479789734,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.40.attn.wo_b.weight",
+      "rel_fro": 0.052737049758434296,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.39.attn.wo_b.weight",
+      "rel_fro": 0.058228787034749985,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.41.attn.wo_b.weight",
+      "rel_fro": 0.047959573566913605,
+      "shape": [
+        4096,
+        8192
+      ]
+    },
+    {
+      "tensor": "layers.42.attn.wo_b.weight",
+      "rel_fro": 0.048650842159986496,
+      "shape": [
+        4096,
+        8192
+      ]
+    }
+  ],
+  "source_stock": "Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX",
+  "recipe": "champion-100pct-reablit",
+  "params": "L10-42 \u03bb=3.5 k=1 MTP-stock",
+  "note": "mHC-resistant family. Direct MXFP8 wo_b edit in MLX packing. MTP + L0-9 stock."
+}

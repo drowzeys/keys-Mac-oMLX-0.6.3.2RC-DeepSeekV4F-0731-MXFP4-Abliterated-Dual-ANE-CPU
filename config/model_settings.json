@@ -1,7 +1,9 @@
 {
   "version": "1.0",
   "models": {
-    "dsv4f-mxfp4": { "mtp_enabled": true },
+    "dsv4f-mxfp4": { "mtp_enabled": true, "enable_thinking": false },
+    "dsv4f-mxfp4-ablit": { "mtp_enabled": true, "enable_thinking": false },
+    "dsv4f-mxfp4-stock": { "mtp_enabled": true, "enable_thinking": false },
     "dsv4f-2p4bit": { "mtp_enabled": true }
   }
 }
