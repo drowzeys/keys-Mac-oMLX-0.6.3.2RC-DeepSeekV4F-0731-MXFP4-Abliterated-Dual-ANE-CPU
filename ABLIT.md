@@ -2,6 +2,8 @@
 
 Mida / 32-32 recipe applied to [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX).
 
+**Published weights:** [`drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated`](https://huggingface.co/drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated) (gated).
+
 ## Why not a drop-in of the DGX FP8 pack
 
 The Mac checkpoint is a **bit-exact byte transplant** of official 0731 into MLX packing:

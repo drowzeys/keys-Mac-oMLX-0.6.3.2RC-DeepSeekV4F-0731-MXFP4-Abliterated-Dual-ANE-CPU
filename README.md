@@ -27,7 +27,8 @@ Higher precision makes the target's next-token distribution sharper, so the DSpa
 ## Hardware / software
 - **Mac:** Mac Studio M3 Ultra, 256 GB unified memory, macOS 26.4
 - **oMLX** built from source with the custom Metal kernel (`OMLX_WITH_CUSTOM_KERNEL=1`), Python 3.11
-- **Model:** [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX) (163 GB; 4-bit MXFP4, keeps the DSpark MTP heads)
+- **Abliterated weights:** [`drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated`](https://huggingface.co/drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated) (gated; 32/32)
+- **Stock quant (if you want to re-project):** [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX) (163 GB; 4-bit MXFP4, keeps the DSpark MTP heads)
 
 ## Reproduce
 
@@ -38,12 +39,13 @@ git clone https://github.com/jundot/omlx && cd omlx
 python3.11 -m venv .venv && source .venv/bin/activate
 OMLX_WITH_CUSTOM_KERNEL=1 pip install -e .            # builds custom_kernels/glm_moe_dsa/*.metallib
 
-# 2. Get the 4-bit MXFP4 checkpoint (keeps MTP)
-hf download Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX
-ln -sfn ~/.cache/huggingface/hub/models--Vontra--DeepSeek-V4-Flash-0731-MXFP4-MLX/snapshots/*/ ~/.omlx/models/dsv4f-mxfp4
+# 2. Abliterated MXFP4-MLX weights (gated — request access first)
+hf download drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated \
+  --local-dir ~/models/dsv4f-mxfp4-ablit
+ln -sfn ~/models/dsv4f-mxfp4-ablit ~/.omlx/models/dsv4f-mxfp4-ablit
 
-# 3. Enable DSpark (MTP is OFF by default — this is the key switch)
-cp config/model_settings.json ~/.omlx/model_settings.json   # {"models":{"dsv4f-mxfp4":{"mtp_enabled":true}}}
+# 3. Enable DSpark + thinking off + 1M window (mtp_enabled defaults to False)
+cp config/model_settings.json ~/.omlx/model_settings.json
 
 # 4. Serve + benchmark
 omlx serve --model-dir ~/.omlx/models --host 0.0.0.0 --port 11500
@@ -72,20 +74,17 @@ Same Vontra MXFP4-MLX checkpoint, same oMLX + DSpark path. Only `attn.wo_b` on *
 
 Full per-layer Δrel + suite log: [ablit/RESULTS.md](ablit/RESULTS.md) · projector notes: [ABLIT.md](ABLIT.md).
 
+**Preferred:** download the published pack (step 2 above). To re-project from stock Vontra instead:
+
 ```bash
-# after the stock recipe above is on disk:
+hf download Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX
+ln -sfn ~/.cache/huggingface/hub/models--Vontra--DeepSeek-V4-Flash-0731-MXFP4-MLX/snapshots/*/ ~/.omlx/models/dsv4f-mxfp4
 python3 scripts/project_wob_mlx.py \
   --src ~/.omlx/models/dsv4f-mxfp4 \
   --dst ~/models/dsv4f-mxfp4-ablit-mida \
   --direction ablit/refusal_direction_reablit_20260726.npz \
   --lambda-attn 3.5 --min-layer 10 --max-layer 42 --n-directions 1
-
-# keep stock, serve ablit under the same recipe name
-ln -sfn "$(readlink -f ~/.omlx/models/dsv4f-mxfp4)" ~/.omlx/models/dsv4f-mxfp4-stock
-ln -sfn ~/models/dsv4f-mxfp4-ablit-mida ~/.omlx/models/dsv4f-mxfp4
 ln -sfn ~/models/dsv4f-mxfp4-ablit-mida ~/.omlx/models/dsv4f-mxfp4-ablit
-cp config/model_settings.json ~/.omlx/model_settings.json   # mtp_enabled + enable_thinking=false
-omlx restart
 ```
 
 Requests need `chat_template_kwargs.enable_thinking = false` (or the model_settings toggle above). Otherwise 0731 spends the token budget inside a hidden plan and short answers look truncated.
@@ -182,4 +181,4 @@ Cold long-context TTFT is still the cost of prefilling a 163 GB model (5.8k ~13 
 - 4-bit MXFP4 MLX quant (keeps MTP): [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX)
 - Runtime + DSpark MTP + DSA kernels: [`jundot/omlx`](https://github.com/jundot/omlx)
 
-This repo contributes the **serving recipe, 49 tok/s bench, MXFP8 `wo_b` abliteration projector, 1M-context knobs, refusal-suite results, and Hermes first-prompt fix** — not the 163 GB weight files.
+Weights: [`drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated`](https://huggingface.co/drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated). This GitHub repo is the **serving recipe** (49 tok/s bench, projector, 1M knobs, refusal results, Hermes first-prompt fix).
