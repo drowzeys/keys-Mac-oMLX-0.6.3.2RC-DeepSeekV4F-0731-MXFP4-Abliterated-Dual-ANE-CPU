@@ -1,8 +1,10 @@
-# DeepSeek-V4-Flash + DSpark on a Mac Studio — 49 tok/s, beating a 2× DGX-Spark vLLM cluster
+# DeepSeek-V4-Flash + DSpark on a Mac Studio — Abliterated, 49 tok/s, 32/32 refusal bypass
 
-Running **DeepSeek-V4-Flash-0731** with **DSpark speculative decoding** natively on Apple Silicon (M3 Ultra) via [oMLX](https://github.com/jundot/omlx), a compiled DSA Metal kernel, and the 4-bit MXFP4 checkpoint that keeps the MTP draft heads.
+Running **abliterated DeepSeek-V4-Flash-0731** with **DSpark speculative decoding** natively on Apple Silicon (M3 Ultra) via [oMLX](https://github.com/jundot/omlx), a compiled DSA Metal kernel, and the 4-bit MXFP4 checkpoint that keeps the MTP draft heads.
 
-**Headline result:** on structured / agentic workloads the Mac Studio *alone* decodes DSV4-Flash **faster than a 2-node DGX-Spark vLLM cluster** — single machine, speculative decode on, lossless.
+**Headline:** same 44–49 tok/s Mac Studio recipe as before, plus the Mida L10–42 `attn.wo_b` abliteration (**32/32 BYPASS**, 0 refuse, 0 garble) and the Hermes first-prompt fix so a `hello` does not sit blank for a minute.
+
+These weights have safety refusals removed. Research / red-team only — you supply the guardrails.
 
 ## Benchmark (oMLX + DSA kernel + MTP on, server-log tok/s)
 
@@ -55,17 +57,20 @@ Read throughput from oMLX's own server log (`~/.omlx/logs/server.log`, `Completi
 - **The brew build fails; build from source with Python 3.11** (3.14 is rejected by oMLX's version pin; the brew formula's env picks the wrong one).
 - **Memory:** the 163 GB checkpoint + MTP overhead needs the Mac's full RAM. Anything else large resident (e.g. pinned Ollama models) will OOM-kill the load.
 
-## Abliterated (same 49 tok/s recipe, refusals removed)
+## Abliteration
 
-Same Vontra MXFP4-MLX checkpoint, same oMLX + DSpark path. Only `attn.wo_b` on **L10–42** is projected (λ=3.5, k=1). **MTP and L0–9 stay stock.** This is the Mac packing of the published 0731 32/32 Mida recipe ([DGX pack](https://huggingface.co/drowzeys/keys-DeepSeekV4-Flash-GA-0731-Dspark-Abliterated-32-32)).
+Same Vontra MXFP4-MLX checkpoint, same oMLX + DSpark path. Only `attn.wo_b` on **L10–42** is projected (λ=3.5, k=1). **MTP and L0–9 stay stock.** Mac packing of the published 0731 32/32 Mida recipe ([DGX pack](https://huggingface.co/drowzeys/keys-DeepSeekV4-Flash-GA-0731-Dspark-Abliterated-32-32)).
 
 | | |
 |--|--|
-| Method | dequant MXFP8 `wo_b` → rank-1 project → keep original e8m0 scales, re-encode e4m3 |
-| Edits | **33** tensors · mean Δrel **0.0557** |
-| Refusal suite | **32/32 BYPASS** · 0 refuse · 0 garble · 0 empty |
+| Method | dequant MXFP8 `wo_b` → rank-1 project → **keep original e8m0 scales**, re-encode e4m3 |
+| Direction | `ablit/refusal_direction_reablit_20260726.npz` (same vector as the DGX 32/32 pack) |
+| Edits | **33** tensors · mean Δrel **0.0557** (min 0.0464 · max 0.0743) |
+| Refusal suite | **32/32 BYPASS** twice · 0 refuse · 0 garble · 0 empty |
 | Coherence | hello / Paris / `17*19=323` / `print("hello")` clean |
 | DSpark | still on (count accept **100%**, tok/cycle **3.73** on a 220-tok count) |
+
+Full per-layer Δrel + suite log: [ablit/RESULTS.md](ablit/RESULTS.md) · projector notes: [ABLIT.md](ABLIT.md).
 
 ```bash
 # after the stock recipe above is on disk:
@@ -87,9 +92,44 @@ Requests need `chat_template_kwargs.enable_thinking = false` (or the model_setti
 
 Flip back to stock: `ln -sfn ~/.omlx/models/dsv4f-mxfp4-stock ~/.omlx/models/dsv4f-mxfp4 && omlx restart`.
 
-The projector **never writes through the Hugging Face blob store** — unchanged shards are hardlinked, edited shards are APFS-cloned then patched. See [ABLIT.md](ABLIT.md).
+The projector **never writes through the Hugging Face blob store** — unchanged shards are hardlinked, edited shards are APFS-cloned then patched.
 
-These weights have safety refusals removed. Same responsible-use terms as the other Keys 0731 abliterated releases: research / red-team only; you supply the guardrails.
+### Hermes first-prompt fix (the “stuck on hello” stall)
+
+Abliterated DSV4 + a fat Hermes system prompt looks hung on the first turn. It is not a refusal hang. On this box a `hellow` sent **20,344 prompt tokens**, sat blank **59.7 s**, and a **title-generation** job hit the same Mac serve at the same time (58 s). The greeting *did* come back; the UI just showed nothing.
+
+Same family as the earlier Mida first-turn bug (skills-catalog dump + `skill_view` on `hello`). This checkpoint did **not** spill the catalog — it just prefills ~20k with cache off and streaming off.
+
+```yaml
+# ~/.hermes/config.yaml  (fragment)
+model:
+  default: dsv4f-mxfp4-ablit
+  provider: custom
+  base_url: http://127.0.0.1:11500/v1   # or the Studio LAN IP
+  max_tokens: 8192
+  context_length: 1048576
+  extra_body:
+    temperature: 0.0
+    chat_template_kwargs: { enable_thinking: false, thinking: false }
+agent:
+  tool_use_enforcement: false
+  disabled_toolsets: [clarify]
+auxiliary:
+  title_generation:
+    enabled: false          # do not steal the 163 GB model on turn 1
+streaming:
+  enabled: true             # tokens appear instead of a 60s blank
+```
+
+On the Mac (`~/.omlx/settings.json`):
+
+```json
+{ "cache": { "enabled": true, "hot_cache_max_size": "32GB" } }
+```
+
+oMLX ships `hot_cache_max_size: "0"` (disabled). A repeated ~20k Hermes prefix then re-prefills every `/new`. After `omlx restart`, `/new`, and one warm turn, the prefix should stick in the 32 GB hot cache.
+
+Also set `enable_thinking: false` on the model (this repo’s `config/model_settings.json`). Without it, 0731 spends the first budget inside a hidden plan and short replies look truncated.
 
 ## Open item
 Cold long-context TTFT is still ~13 s for a 5.8K-token prompt (the prefill of a 163 GB model). Offloading prefill to a companion DGX Spark (its native CUDA DSA kernels) would cut that — true prefill/decode disaggregation — but oMLX has no KV-injection API, so that path needs a custom decode server. Not done here.
@@ -99,4 +139,4 @@ Cold long-context TTFT is still ~13 s for a 5.8K-token prompt (the prefill of a 
 - 4-bit MXFP4 MLX quant (keeps MTP): [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX)
 - Runtime + DSpark MTP + DSA kernels: [`jundot/omlx`](https://github.com/jundot/omlx)
 
-This repo contributes the **serving recipe + benchmark methodology + the counter-intuitive 4-bit-beats-2.4-bit finding + the MXFP8 `wo_b` abliteration projector**, not the 163 GB weight files.
+This repo contributes the **serving recipe, 49 tok/s bench, MXFP8 `wo_b` abliteration projector, refusal-suite results, and Hermes first-prompt fix** — not the 163 GB weight files.

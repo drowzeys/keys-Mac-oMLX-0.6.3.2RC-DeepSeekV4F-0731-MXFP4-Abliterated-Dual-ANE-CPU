@@ -44,6 +44,20 @@ Unchanged shards are hardlinked to the resolved HF blob. Edited shards (24 × ~5
 
 Set `enable_thinking: false` in `~/.omlx/model_settings.json` (this repo's `config/model_settings.json`) or pass `chat_template_kwargs.enable_thinking=false` on each request.
 
+Numbers: [ablit/RESULTS.md](ablit/RESULTS.md).
+
+## Hermes first-prompt stall
+
+Fat Hermes system (~20k tokens) + abliterated DSV4 looks hung on `hello`. Measured here: 20,344 prompt tokens, 59.7 s blank UI, plus a concurrent title-generation job on the same 163 GB model. The greeting did return; it was not a refusal hang and it did not dump the skills catalog (the older Mida first-turn failure mode).
+
+Fix:
+
+1. `auxiliary.title_generation.enabled: false` so Hermes does not steal the Mac on turn 1
+2. `streaming.enabled: true` so tokens appear instead of a minute of nothing
+3. oMLX `cache.hot_cache_max_size: "32GB"` (stock is `"0"` = off) then `omlx restart`
+4. `enable_thinking: false` on the model
+5. `/new` after any of the above
+
 ## Responsible use
 
 Safety refusals are removed. Same terms as the other Keys 0731 abliterated releases: research / red-team / evaluation. You supply filtering and access control. Do not use for anything involving minors, self-harm, or other prohibited uses in those cards.
