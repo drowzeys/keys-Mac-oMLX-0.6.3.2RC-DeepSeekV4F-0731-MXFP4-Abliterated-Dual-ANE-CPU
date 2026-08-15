@@ -24,40 +24,52 @@ Reference points on the same model (0731):
 ### Why 4-bit is *faster* than 2.4-bit here (counter-intuitive)
 Higher precision makes the target's next-token distribution sharper, so the DSpark drafter accepts much deeper: **accept 62–82% → 85–95%, tok/cycle 2.07 → 3.33** (depth-3 drafts landing ~85%). The base forward isn't purely bandwidth-bound, so drafting 3+ tokens per target pass far outweighs the 1.8× extra weight bytes.
 
-## Hardware / software
-- **Mac:** Mac Studio M3 Ultra, 256 GB unified memory, macOS 26.4
-- **oMLX** built from source with the custom Metal kernel (`OMLX_WITH_CUSTOM_KERNEL=1`), Python 3.11
-- **Abliterated weights:** [`drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated`](https://huggingface.co/drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated) (gated; 32/32)
-- **Stock quant (if you want to re-project):** [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX) (163 GB; 4-bit MXFP4, keeps the DSpark MTP heads)
+**One-shot for agents:** [AGENTS.md](AGENTS.md). **Prebuilts (no Docker):** [PREBUILT.md](PREBUILT.md).
 
-## Reproduce
+## Hardware / software
+- **Mac:** Mac Studio M3 Ultra, 256 GB unified memory, macOS 26.4+
+- **oMLX prebuilt:** Homebrew `jundot/omlx` **≥ 0.5.7** + Python **3.11** (this Studio used 0.5.7). There is **no GHCR/Docker image** — Metal is not a Linux container.
+- **Abliterated weights:** [`drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated`](https://huggingface.co/drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated) (gated; 34 shards / 156 GiB; 32/32)
+- **Stock quant (re-project only):** [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX)
+
+## Reproduce (prebuilt path)
 
 ```bash
-# 1. oMLX with the DSA Metal kernel (needs Xcode + Metal Toolchain)
-xcodebuild -downloadComponent MetalToolchain          # via DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-git clone https://github.com/jundot/omlx && cd omlx
-python3.11 -m venv .venv && source .venv/bin/activate
-OMLX_WITH_CUSTOM_KERNEL=1 pip install -e .            # builds custom_kernels/glm_moe_dsa/*.metallib
+# 0. This recipe — configs + bench live HERE (do not start in the omlx source tree)
+git clone https://github.com/drowzeys/keys-Mac-DeepSeek-V4-Flash-DSpark-0731-MXFP4-MLX-Abliterated-49tps
+cd keys-Mac-DeepSeek-V4-Flash-DSpark-0731-MXFP4-MLX-Abliterated-49tps
 
-# 2. Abliterated MXFP4-MLX weights (gated — request access first)
-hf download drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated \
-  --local-dir ~/models/dsv4f-mxfp4-ablit
-ln -sfn ~/models/dsv4f-mxfp4-ablit ~/.omlx/models/dsv4f-mxfp4-ablit
+# 1. Prebuilt oMLX (pin 3.11 — brew's default python can be 3.14 and oMLX rejects it)
+brew install python@3.11 huggingface-cli
+brew tap jundot/omlx https://github.com/jundot/omlx
+brew install omlx
+# optional long-ctx prefill kernel (needs full Xcode):
+# brew install omlx --HEAD --with-custom-kernel
 
-# 3. Enable DSpark + thinking off + 1M window (mtp_enabled defaults to False)
-cp config/model_settings.json ~/.omlx/model_settings.json
+# 2. Gated HF pack (~156 GiB). Request access first if hf download 401s.
+#    https://huggingface.co/drowzeys/keys-Mac-DeepSeek-V4-Flash-0731-MXFP4-MLX-Abliterated
+bash scripts/setup-mac.sh
+# downloads the pack, ln -sfn into ~/.omlx/models/dsv4f-mxfp4-ablit,
+# copies config/model_settings.json, sets hot_cache 32GB + 1M window
 
-# 4. Serve + benchmark
+# 3. Serve + bench (model id is the symlink name)
 omlx serve --model-dir ~/.omlx/models --host 0.0.0.0 --port 11500
-python3 bench/omlx_bench.py http://127.0.0.1:11500
+# other terminal:
+python3 bench/omlx_bench.py http://127.0.0.1:11500 dsv4f-mxfp4-ablit
 ```
-Read throughput from oMLX's own server log (`~/.omlx/logs/server.log`, `Completion:` lines) — it reports accurate tok/s and the per-request accept stats. A naive client streaming counter undercounts because oMLX batches multiple tokens per SSE chunk.
+
+Read tok/s from oMLX's server log (`~/.omlx/logs/server.log`, `Completion:` / `Chat completion:`). A naive client streaming counter undercounts because oMLX batches multiple tokens per SSE chunk.
+
+Source-build fallback (DSA kernel from scratch): Xcode Metal toolchain, then `OMLX_WITH_CUSTOM_KERNEL=1 pip install -e .` in a 3.11 venv of [jundot/omlx](https://github.com/jundot/omlx). See [PREBUILT.md](PREBUILT.md).
 
 ## Gotchas that cost us hours
-- **`mtp_enabled` defaults to `False`.** Without it you get plain base decode (~31 tok/s = the checkpoint's "spec-off" number) and think DSpark is broken. It isn't — it's just off.
-- **The DSA kernel must be compiled.** Otherwise oMLX warns `glm_moe_dsa extension not built` and long-context *prefill* falls back to slow MLX (17 s cold TTFT for a 5.8K prompt vs ~6 s with the kernel). Decode is unaffected by this.
-- **The brew build fails; build from source with Python 3.11** (3.14 is rejected by oMLX's version pin; the brew formula's env picks the wrong one).
-- **Memory:** the 163 GB checkpoint + MTP overhead needs the Mac's full RAM. Anything else large resident (e.g. pinned Ollama models) will OOM-kill the load.
+- **`mtp_enabled` defaults to `False`.** Without it you get plain base decode (~31 tok/s) and think DSpark is broken. `scripts/setup-mac.sh` copies `config/model_settings.json` so it is on.
+- **`cp config/model_settings.json` only works from *this* clone**, not from the omlx source tree. Use `setup-mac.sh` or set `RECIPE=`.
+- **`bench/omlx_bench.py` defaults to `dsv4f-mxfp4-ablit`.** Pass the model id as argv2. Do not leave it on `dsv4f-2p4bit`.
+- **DSA kernel is optional for decode.** Without it, long-context *prefill* falls back to slow MLX (~17 s vs ~6 s TTFT on a 5.8k prompt).
+- **Python 3.14:** oMLX rejects it. `brew install python@3.11` first so the formula does not pick 3.14.
+- **Memory:** 163 GB checkpoint + MTP needs the Mac’s full RAM. Unload Ollama / other pinned models first.
+- **HF pack is gated.** `hf download` 401/403 → request access on the model card, then retry. Owner `drowzeys` can download immediately.
 
 ## Abliteration
 

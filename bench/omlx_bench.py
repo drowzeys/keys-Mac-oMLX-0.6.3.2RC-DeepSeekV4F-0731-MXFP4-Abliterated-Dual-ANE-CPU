@@ -4,7 +4,7 @@ count / list / read / essay. Separates TTFT (first token) from decode tok/s (res
 import json, time, urllib.request, sys
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:11500"
-MODEL = "dsv4f-2p4bit"
+MODEL = sys.argv[2] if len(sys.argv) > 2 else "dsv4f-mxfp4-ablit"
 _DOC = ("In distributed inference, prefill is compute-bound while decode is memory-bandwidth-bound. "
         "The KV cache stores per-layer key and value projections for every prompt token. ") * 180
 
@@ -55,7 +55,7 @@ def main():
                 best = (ttft, dec, n)
         rows.append((name, *best))
         print(f"{name:6} | TTFT {best[0]:.2f}s | decode {best[1]:.1f} tok/s | {best[2]} tok", flush=True)
-    print("\n===== oMLX DSpark DSV4F (2.4bit) — Mac-only, raw endpoint =====")
+    print(f"\n===== oMLX DSpark DSV4F ({MODEL}) — Mac-only, raw endpoint =====")
     print(f"{'task':8} {'TTFT(s)':>9} {'decode tok/s':>13} {'tokens':>8}")
     for name, ttft, dec, n in rows:
         print(f"{name:8} {ttft:>9.2f} {dec:>13.1f} {n:>8}")
