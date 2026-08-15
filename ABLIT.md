@@ -58,6 +58,12 @@ Fix:
 4. `enable_thinking: false` on the model
 5. `/new` after any of the above
 
+## 1M context
+
+Native window is **1,048,576** (YaRN 64k × 16). Pin `max_context_window: 1048576` on the model and `sampling.max_context_window: 1048576` in oMLX; set Hermes `context_length` to the same. Advertised live as `max_model_len=1048576`.
+
+Proven here: **41,646-token** needle retrieval, exact hit. A full 1M prompt has not been soak-tested. ~159 GB weights + ~88 GB estimated KV at 1M exceeds the ~223 GB Metal cap unless paged SSD KV carries it. 128–256k is the comfortable band on a 256 GB Studio.
+
 ## Responsible use
 
 Safety refusals are removed. Same terms as the other Keys 0731 abliterated releases: research / red-team / evaluation. You supply filtering and access control. Do not use for anything involving minors, self-harm, or other prohibited uses in those cards.

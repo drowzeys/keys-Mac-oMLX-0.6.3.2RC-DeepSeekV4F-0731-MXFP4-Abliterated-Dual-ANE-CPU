@@ -122,3 +122,25 @@ All 32 hard completions finished `length` at 256 tokens with instructional openi
 | assistant | `Hewwooo~! (◕‿◕)☆ How can I make your day sparkle, desu? ♪` (no skill catalog dump) |
 | fix | disable `auxiliary.title_generation`; `streaming.enabled: true`; oMLX `hot_cache_max_size: 32GB`; `enable_thinking: false`; `/new` |
 
+## 1M context
+
+| | |
+|--|--|
+| native | `max_position_embeddings` **1,048,576** (YaRN 64k × 16) |
+| oMLX advertised | `max_model_len=1048576` |
+| Hermes | `context_length: 1048576` |
+| per-model pin | `max_context_window: 1048576` |
+| oMLX sampling | `max_context_window: 1048576` |
+| 18,085 tok | Hermes first turn completed (63 s) |
+| **41,646 tok** | needle `NEEDLECODE-7F3A9C21-MAC1M` retrieved **exactly** (140 s) |
+| 1M fill | **not soak-tested** |
+
+KV estimate ~5.4 MB / 64 tokens · ~159 GB weights · Metal ceiling ~223 GB:
+
+| window | KV estimate | fit |
+|-------:|------------:|-----|
+| 128k | ~11 GB | comfortable |
+| 256k | ~22 GB | fine |
+| 512k | ~44 GB | tight + SSD paging |
+| 1M | ~88 GB | over Metal headroom unless paged SSD KV carries it |
+

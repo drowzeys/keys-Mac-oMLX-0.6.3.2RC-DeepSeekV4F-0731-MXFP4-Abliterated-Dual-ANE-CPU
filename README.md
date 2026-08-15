@@ -2,7 +2,7 @@
 
 Running **abliterated DeepSeek-V4-Flash-0731** with **DSpark speculative decoding** natively on Apple Silicon (M3 Ultra) via [oMLX](https://github.com/jundot/omlx), a compiled DSA Metal kernel, and the 4-bit MXFP4 checkpoint that keeps the MTP draft heads.
 
-**Headline:** same 44–49 tok/s Mac Studio recipe as before, plus the Mida L10–42 `attn.wo_b` abliteration (**32/32 BYPASS**, 0 refuse, 0 garble) and the Hermes first-prompt fix so a `hello` does not sit blank for a minute.
+**Headline:** same 44–49 tok/s Mac Studio recipe as before, plus the Mida L10–42 `attn.wo_b` abliteration (**32/32 BYPASS**, 0 refuse, 0 garble), a **1,048,576** advertised context window, and the Hermes first-prompt fix so a `hello` does not sit blank for a minute.
 
 These weights have safety refusals removed. Research / red-team only — you supply the guardrails.
 
@@ -131,12 +131,55 @@ oMLX ships `hot_cache_max_size: "0"` (disabled). A repeated ~20k Hermes prefix t
 
 Also set `enable_thinking: false` on the model (this repo’s `config/model_settings.json`). Without it, 0731 spends the first budget inside a hidden plan and short replies look truncated.
 
+## 1M context
+
+0731 is natively **1,048,576** tokens (YaRN, 64k × 16). Once the model is loaded, oMLX advertises `max_model_len=1048576`. The historical `sampling.max_context_window: 32768` is only a fallback when native length is unknown — pin 1M explicitly so nothing silently clamps.
+
+```jsonc
+// ~/.omlx/model_settings.json  (this repo’s config/model_settings.json)
+{
+  "models": {
+    "dsv4f-mxfp4-ablit": {
+      "mtp_enabled": true,
+      "enable_thinking": false,
+      "max_context_window": 1048576
+    }
+  }
+}
+
+// ~/.omlx/settings.json
+{
+  "sampling": { "max_context_window": 1048576, "max_tokens": 32768 },
+  "cache": { "enabled": true, "hot_cache_max_size": "32GB" }
+}
+```
+
+Hermes: `model.context_length: 1048576` (Hermes refuses anything under 64k).
+
+**Measured on this Studio**
+
+| prompt tokens | result |
+|--------------:|--------|
+| 18,085 | Hermes first turn completed (63 s, fat system prompt) |
+| **41,646** | needle at the start retrieved **exactly** (`NEEDLECODE-7F3A9C21-MAC1M`, 140 s) |
+
+A full **1M fill has not been soak-tested**. Weights are ~159 GB; Apple Metal ceiling on this box is ~223 GB (~63 GB headroom). oMLX’s KV estimate is ~5.4 MB per 64 tokens, DSA rotating window 128, paged SSD cache on (~372 GB):
+
+| window | KV estimate | fit on 256 GB Studio |
+|-------:|------------:|----------------------|
+| 128k | ~11 GB | comfortable |
+| 256k | ~22 GB | fine |
+| 512k | ~44 GB | tight, SSD paging helps |
+| **1M** | **~88 GB** | over Metal headroom unless paged SSD KV carries it |
+
+Prefill is the other wall. 18k already took ~63 s; a cold 1M prefill is tens of minutes, and the dense DSA path can blow up before RAM does. Use the compiled `glm_moe_dsa` kernel (windowed). Offloading that prefill to a DGX Spark still needs a KV-injection API oMLX does not have.
+
 ## Open item
-Cold long-context TTFT is still ~13 s for a 5.8K-token prompt (the prefill of a 163 GB model). Offloading prefill to a companion DGX Spark (its native CUDA DSA kernels) would cut that — true prefill/decode disaggregation — but oMLX has no KV-injection API, so that path needs a custom decode server. Not done here.
+Cold long-context TTFT is still the cost of prefilling a 163 GB model (5.8k ~13 s in the original bench; 18k Hermes ~63 s). True prefill/decode disaggregation onto a companion DGX Spark is not done here.
 
 ## Credits
 - Base model: [`deepseek-ai/DeepSeek-V4-Flash-0731`](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731)
 - 4-bit MXFP4 MLX quant (keeps MTP): [`Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX`](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX)
 - Runtime + DSpark MTP + DSA kernels: [`jundot/omlx`](https://github.com/jundot/omlx)
 
-This repo contributes the **serving recipe, 49 tok/s bench, MXFP8 `wo_b` abliteration projector, refusal-suite results, and Hermes first-prompt fix** — not the 163 GB weight files.
+This repo contributes the **serving recipe, 49 tok/s bench, MXFP8 `wo_b` abliteration projector, 1M-context knobs, refusal-suite results, and Hermes first-prompt fix** — not the 163 GB weight files.
