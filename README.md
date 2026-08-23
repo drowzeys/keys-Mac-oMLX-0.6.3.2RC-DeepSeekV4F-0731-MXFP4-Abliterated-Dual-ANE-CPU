@@ -16,7 +16,7 @@ This recipe stands on other people's work. Please star them.
 - **[ml-explore/MLX](https://github.com/ml-explore/mlx)**  
 - Spark cousins: **[Anemll](https://github.com/Anemll/dspark-vllm-gx10)**, **[MiaAI-Lab](https://github.com/MiaAI-Lab/DeepSeek-v4-Flash-DSpark-2x-DGX-Spark)**, **[Tony / tonyd2wild](https://github.com/tonyd2wild)**  
 
-Full list: **[CREDITS.md](CREDITS.md)**. Please donate / support: **[github.com/sponsors/drowzeys](https://github.com/sponsors/drowzeys)**.
+Full list: **[CREDITS.md](CREDITS.md)**. Please donate / support: **[GoFundMe](https://t.co/5O4WUxexXa)**.
 
 ## Headline (measured 2026-08-23, M3 Ultra 256 GB)
 
@@ -80,4 +80,4 @@ Aday777 NVFP4 Dual-ANE is a no-op on this path. Stay on MXFP4.
 
 ## Credits
 
-See **[CREDITS.md](CREDITS.md)**. Pack: drowzeys / keys.
+Thanks to everyone who contributed — full credits in **[CREDITS.md](CREDITS.md)**. Pack: drowzeys / keys.
