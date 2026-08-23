@@ -16,7 +16,7 @@ This recipe stands on other people's work. Please star them.
 - **[ml-explore/MLX](https://github.com/ml-explore/mlx)**  
 - Spark cousins: **[Anemll](https://github.com/Anemll/dspark-vllm-gx10)**, **[MiaAI-Lab](https://github.com/MiaAI-Lab/DeepSeek-v4-Flash-DSpark-2x-DGX-Spark)**, **[Tony / tonyd2wild](https://github.com/tonyd2wild)**  
 
-Full list: **[CREDITS.md](CREDITS.md)**.
+Full list: **[CREDITS.md](CREDITS.md)**. Please donate / support: **[github.com/sponsors/drowzeys](https://github.com/sponsors/drowzeys)**.
 
 ## Headline (measured 2026-08-23, M3 Ultra 256 GB)
 
