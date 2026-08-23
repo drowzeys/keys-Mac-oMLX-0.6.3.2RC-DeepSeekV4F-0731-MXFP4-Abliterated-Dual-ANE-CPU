@@ -1,0 +1,285 @@
+{
+  "note": "Primary: structural + list/essay/reading. Count diagnostic. thinking=false temp=0. decode=post-TTFT.",
+  "url": "http://127.0.0.1:11500",
+  "model": "dsv4f-mxfp4-ablit",
+  "kwargs": {
+    "thinking": false,
+    "enable_thinking": false
+  },
+  "conc": 4,
+  "c1": {
+    "structural": {
+      "decode_tok_s": [
+        48.26,
+        51.26,
+        49.82
+      ],
+      "wall_tok_s": [
+        45.29,
+        48.18,
+        46.9
+      ],
+      "completion_tokens": [
+        512,
+        512,
+        512
+      ],
+      "ttft_ms": [
+        697,
+        640,
+        641
+      ],
+      "median_decode": 49.82,
+      "median_wall": 46.9,
+      "best_decode": 51.26,
+      "preview": "[ {\"host\":\"gpu-srv-01\",\"gpuIndex\":0,\"utilPct\":87.3,\"tempC\":78.2,\"powerW\":312.5,\"memUsedMb\":14208}, {\"host\":\"gpu-srv-01\",\"gpuIndex\":1,\"utilPc",
+      "finish": [
+        "length",
+        "length",
+        "length"
+      ],
+      "role": "primary"
+    },
+    "list": {
+      "decode_tok_s": [
+        54.01,
+        53.8,
+        51.6
+      ],
+      "wall_tok_s": [
+        46.33,
+        46.23,
+        44.14
+      ],
+      "completion_tokens": [
+        159,
+        159,
+        159
+      ],
+      "ttft_ms": [
+        488,
+        484,
+        521
+      ],
+      "median_decode": 53.8,
+      "median_wall": 46.23,
+      "best_decode": 54.01,
+      "preview": "1. the 2. be 3. to 4. of 5. and 6. a 7. in 8. that 9. have 10. I 11. it 12. for 13. not 14. on 15. with 16. he 17. as 18. you 19. do 20. at ",
+      "finish": [
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "role": "primary"
+    },
+    "essay": {
+      "decode_tok_s": [
+        30.31,
+        29.17,
+        29.63
+      ],
+      "wall_tok_s": [
+        28.77,
+        27.8,
+        28.23
+      ],
+      "completion_tokens": [
+        296,
+        296,
+        296
+      ],
+      "ttft_ms": [
+        522,
+        501,
+        497
+      ],
+      "median_decode": 29.63,
+      "median_wall": 28.23,
+      "best_decode": 30.31,
+      "preview": "Cities are complex ecosystems of concrete, glass, and human ambition, yet they cannot thrive on infrastructure alone. Public parks are not a",
+      "finish": [
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "role": "primary"
+    },
+    "reading": {
+      "decode_tok_s": [
+        31.07,
+        32.26,
+        32.22
+      ],
+      "wall_tok_s": [
+        29.23,
+        30.3,
+        30.28
+      ],
+      "completion_tokens": [
+        256,
+        256,
+        256
+      ],
+      "ttft_ms": [
+        520,
+        512,
+        509
+      ],
+      "median_decode": 32.22,
+      "median_wall": 30.28,
+      "best_decode": 32.26,
+      "preview": "Prefix caching accelerates LLM serving in multi-agent systems by storing the computed key-value (KV) cache of shared prompt segments\u2014such as",
+      "finish": [
+        "length",
+        "length",
+        "length"
+      ],
+      "role": "primary"
+    },
+    "count": {
+      "decode_tok_s": [
+        52.24,
+        52.81,
+        52.31
+      ],
+      "wall_tok_s": [
+        39.86,
+        40.15,
+        39.88
+      ],
+      "completion_tokens": [
+        79,
+        79,
+        79
+      ],
+      "ttft_ms": [
+        470,
+        472,
+        471
+      ],
+      "median_decode": 52.31,
+      "median_wall": 39.88,
+      "best_decode": 52.81,
+      "preview": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40",
+      "finish": [
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "role": "diagnostic"
+    }
+  },
+  "c4": {
+    "structural": {
+      "samples": [
+        {
+          "aggregate_tok_s": 56.9,
+          "median_stream_decode": 15.04,
+          "total_tok": 2048,
+          "wall_s": 35.99,
+          "median_ttft_ms": 1863.78
+        },
+        {
+          "aggregate_tok_s": 56.59,
+          "median_stream_decode": 14.96,
+          "total_tok": 2048,
+          "wall_s": 36.19,
+          "median_ttft_ms": 1866.66
+        }
+      ],
+      "median_aggregate": 56.75,
+      "best_aggregate": 56.9,
+      "median_stream_decode": 15.0,
+      "role": "primary"
+    },
+    "list": {
+      "samples": [
+        {
+          "aggregate_tok_s": 54.05,
+          "median_stream_decode": 15.17,
+          "total_tok": 636,
+          "wall_s": 11.77,
+          "median_ttft_ms": 1190.17
+        },
+        {
+          "aggregate_tok_s": 54.0,
+          "median_stream_decode": 15.17,
+          "total_tok": 636,
+          "wall_s": 11.78,
+          "median_ttft_ms": 1207.34
+        }
+      ],
+      "median_aggregate": 54.02,
+      "best_aggregate": 54.05,
+      "median_stream_decode": 15.17,
+      "role": "primary"
+    },
+    "essay": {
+      "samples": [
+        {
+          "aggregate_tok_s": 54.22,
+          "median_stream_decode": 15.51,
+          "total_tok": 1160,
+          "wall_s": 21.4,
+          "median_ttft_ms": 1248.41
+        },
+        {
+          "aggregate_tok_s": 54.29,
+          "median_stream_decode": 15.52,
+          "total_tok": 1160,
+          "wall_s": 21.37,
+          "median_ttft_ms": 1241.4
+        }
+      ],
+      "median_aggregate": 54.25,
+      "best_aggregate": 54.29,
+      "median_stream_decode": 15.52,
+      "role": "primary"
+    },
+    "reading": {
+      "samples": [
+        {
+          "aggregate_tok_s": 55.79,
+          "median_stream_decode": 15.09,
+          "total_tok": 1024,
+          "wall_s": 18.35,
+          "median_ttft_ms": 1297.58
+        },
+        {
+          "aggregate_tok_s": 55.78,
+          "median_stream_decode": 15.1,
+          "total_tok": 1024,
+          "wall_s": 18.36,
+          "median_ttft_ms": 1321.93
+        }
+      ],
+      "median_aggregate": 55.78,
+      "best_aggregate": 55.79,
+      "median_stream_decode": 15.09,
+      "role": "primary"
+    },
+    "count": {
+      "samples": [
+        {
+          "aggregate_tok_s": 48.83,
+          "median_stream_decode": 14.97,
+          "total_tok": 316,
+          "wall_s": 6.47,
+          "median_ttft_ms": 1113.82
+        },
+        {
+          "aggregate_tok_s": 49.3,
+          "median_stream_decode": 15.15,
+          "total_tok": 316,
+          "wall_s": 6.41,
+          "median_ttft_ms": 1114.45
+        }
+      ],
+      "median_aggregate": 49.06,
+      "best_aggregate": 49.3,
+      "median_stream_decode": 15.06,
+      "role": "diagnostic"
+    }
+  },
+  "ts": 1787513973.7599108
+}

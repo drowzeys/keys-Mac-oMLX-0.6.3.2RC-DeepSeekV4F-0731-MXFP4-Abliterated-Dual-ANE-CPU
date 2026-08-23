@@ -1,0 +1,11 @@
+# Carrier image: DSV4F 0731 MXFP4 Dual-ANE+CPU recipe. Not a Metal runtime.
+FROM busybox:1.36
+LABEL org.opencontainers.image.title="keys-Mac-oMLX-0.6.3.2RC-DeepSeekV4F-0731-MXFP4-Abliterated-Dual-ANE-CPU"
+LABEL org.opencontainers.image.version="1.0.0-beta"
+LABEL org.opencontainers.image.source="https://github.com/drowzeys/keys-Mac-oMLX-0.6.3.2RC-DeepSeekV4F-0731-MXFP4-Abliterated-Dual-ANE-CPU"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+COPY README.md AGENTS.md VERSION /omlx/
+COPY config/ /omlx/config/
+COPY scripts/ /omlx/scripts/
+COPY bench/results/ /omlx/bench-results/
+CMD ["/bin/sh","-c","echo keys-mac-dsv4f-mxfp4-dualane 1.0-beta; ls -la /omlx"]
