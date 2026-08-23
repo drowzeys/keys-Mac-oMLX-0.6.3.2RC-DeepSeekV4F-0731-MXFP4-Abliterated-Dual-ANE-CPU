@@ -6,6 +6,18 @@ Previous 49 tok/s / oMLX 0.5.7 pack: [`previous-version/`](previous-version/READ
 
 These weights have safety refusals removed. Research / red-team only — you supply the guardrails.
 
+## Big thanks
+
+This recipe stands on other people's work. Please star them.
+
+- **[jundot/omlx](https://github.com/jundot/omlx)** — oMLX, MTP/DSpark on Mac, Dual-ANE prefill  
+- **[DeepSeek-AI](https://www.deepseek.com/)** — V4-Flash 0731 + DSpark  
+- **[Vontra MXFP4-MLX](https://huggingface.co/Vontra/DeepSeek-V4-Flash-0731-MXFP4-MLX)** — 4-bit Mac quant  
+- **[ml-explore/MLX](https://github.com/ml-explore/mlx)**  
+- Spark cousins: **[Anemll](https://github.com/Anemll/dspark-vllm-gx10)**, **[MiaAI-Lab](https://github.com/MiaAI-Lab/DeepSeek-v4-Flash-DSpark-2x-DGX-Spark)**, **[Tony / tonyd2wild](https://github.com/tonyd2wild)**  
+
+Full list: **[CREDITS.md](CREDITS.md)**.
+
 ## Headline (measured 2026-08-23, M3 Ultra 256 GB)
 
 Keep **4-bit MXFP4**. Dual-ANE is **prefill-only** on DSV4 (decode is noise vs ANE-off).
@@ -68,4 +80,4 @@ Aday777 NVFP4 Dual-ANE is a no-op on this path. Stay on MXFP4.
 
 ## Credits
 
-oMLX: [jundot/omlx](https://github.com/jundot/omlx). 0731: DeepSeek. Pack: drowzeys / keys.
+See **[CREDITS.md](CREDITS.md)**. Pack: drowzeys / keys.
